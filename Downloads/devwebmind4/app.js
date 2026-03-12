@@ -241,6 +241,9 @@ function initVoiceRecognition() {
 function toggleVoiceInput() {
   console.log('🎤 Microphone button clicked, recognition:', recognition);
   
+  // Stop any ongoing speech when mic is activated
+  stopSpeak();
+  
   if (!recognition) {
     console.error('❌ Recognition not initialized');
     const errorMsg = '⚠️ Voice not supported. Use Chrome, Edge, or Safari.';
@@ -623,17 +626,48 @@ if (inp) {
 
 // KEYBOARD SHORTCUTS
 document.addEventListener('keydown', (e) => {
-  // Ctrl+M to toggle microphone
-  if (e.ctrlKey && e.key === 'm') {
+  // Ctrl+M or Space to START microphone
+  if ((e.ctrlKey && e.key === 'm') || (e.code === 'Space' && document.activeElement !== inp)) {
     e.preventDefault();
-    toggleVoiceInput();
+    
+    if (!isListening && recognition) {
+      stopSpeak();
+      try {
+        recognition.start();
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+      }
+    }
+  }
+  
+  // Ctrl+S to STOP microphone
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault();
+    
+    if (isListening && recognition) {
+      recognition.stop();
+    }
+  }
+  
+  // Escape to STOP speech
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    stopSpeak();
   }
 });
 
-// RIGHT-CLICK to toggle microphone
+// RIGHT-CLICK to START microphone
 document.addEventListener('contextmenu', (e) => {
   e.preventDefault();
-  toggleVoiceInput();
+  
+  if (!isListening && recognition) {
+    stopSpeak();
+    try {
+      recognition.start();
+    } catch (error) {
+      console.error('Error starting recognition:', error);
+    }
+  }
 });
 
 async function getPersonalizedRecommendations() {
@@ -753,11 +787,8 @@ auth.onAuthStateChanged(async user => {
   // Initialize voice AFTER welcome
   initVoiceRecognition();
   
-  console.log('✅ WebMind v28.0 - Transformer Summarization + Personalized Recommendations');
-  console.log('🎤 Voice:', recognition ? 'Ready (10 sec continuous)' : 'Not supported');
-  console.log('🔊 Speech: 0.7 (slow)');
-  console.log('🤖 AI Recommendations: Enabled');
-  console.log('👤 Auth Status:', currentUser ? `Logged in as ${currentUser.name}` : 'Guest mode');
-  console.log('🎯 Mic button:', mic ? 'Found' : 'Not found');
-  console.log('🎯 Send button:', send ? 'Found' : 'Not found');
+  console.log('✅ WebMind v29.0 - Voice Shortcuts + Auto Speech Stop');
+  console.log('🎤 Mic Start: Ctrl+M, Space, Right-click');
+  console.log('🛑 Mic Stop: Ctrl+S');
+  console.log('🔇 Speech Stop: Escape');
 })();
