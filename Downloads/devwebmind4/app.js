@@ -626,32 +626,43 @@ if (inp) {
 
 // KEYBOARD SHORTCUTS
 document.addEventListener('keydown', (e) => {
+  console.log('Key pressed:', e.key, 'Code:', e.code, 'Ctrl:', e.ctrlKey, 'Active element:', document.activeElement.tagName);
+  
   // Ctrl+M or Space to START microphone
   if ((e.ctrlKey && e.key === 'm') || (e.code === 'Space' && document.activeElement !== inp)) {
     e.preventDefault();
+    console.log('▶️ Shortcut triggered - Starting mic');
     
     if (!isListening && recognition) {
       stopSpeak();
       try {
         recognition.start();
+        console.log('✅ Mic started successfully');
       } catch (error) {
-        console.error('Error starting recognition:', error);
+        console.error('❌ Error starting recognition:', error);
       }
+    } else {
+      console.log('⚠️ Already listening or recognition not available');
     }
   }
   
   // Ctrl+S to STOP microphone
   if (e.ctrlKey && e.key === 's') {
     e.preventDefault();
+    console.log('⏹️ Shortcut triggered - Stopping mic');
     
     if (isListening && recognition) {
       recognition.stop();
+      console.log('✅ Mic stopped successfully');
+    } else {
+      console.log('⚠️ Not listening');
     }
   }
   
   // Escape to STOP speech
   if (e.key === 'Escape') {
     e.preventDefault();
+    console.log('🔇 Escape pressed - Stopping speech');
     stopSpeak();
   }
 });
